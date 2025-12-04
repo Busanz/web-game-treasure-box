@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The treasure box</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Creepster&family=Quicksand&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Creepster&family=Nosifer&family=Quicksand&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/styles.css" />
+    <script src="./scripts/jquery-3.7.1.min.js" defer></script>
+    <script src="./scripts/scripts.js" defer></script>
+  </head>
+  <body>
+    <section>
+      <div class="header">
+        <h1>The Teasure Box</h1>
+      </div>
+      <div class="display">
+        <div class="display_left">
+          <h3>Attempts</h3>
+          <p>3/5</p>
+          <button class="display_left--btnReset">Reset</button>
+          <button class="display_left--btnInstruction">Guides</button>
+        </div>
+        <div class="display_midddle">
+          <div class="display_middle--notification">
+            <button class="notification--btnClose">&times;</button>
+            <h2>Innvalid pattern ❌</h2>
+            <p class="notification--message">
+              🧩 Five magical color orbs 🔴🔵🟢🟡🟣
+            </p>
+          </div>
+
+          <div class="colors_to_select">
+            <div class="color_ball red"><span>0</span></div>
+            <div class="color_ball purple"><span>1</span></div>
+            <div class="color_ball green"><span>2</span></div>
+            <div class="color_ball yellow"><span>3</span></div>
+            <div class="color_ball blue"><span>4</span></div>
+          </div>
+          <div class="place_to_put">
+            <div class="put_in place_to_put--01"></div>
+            <div class="put_in place_to_put--02"></div>
+            <div class="put_in place_to_put--03"></div>
+          </div>
+          <button class="display_midddle--btnCheck">Check code</button>
+        </div>
+        <div class="display_right">
+          <h3>Previous Guesses</h3>
+          <p>1.</p>
+          <p>2.</p>
+          <p>3.</p>
+          <p>4.</p>
+        </div>
+      </div>
+
+      <main class="main">
+        <div class="main_intro">
+          <p class="main_intro--description"></p>
+          <button class="main_intro--btnNext">Next</button>
+          <p class="main_intro--instruction">Skip the game introduction</p>
+          <button class="main_intro--btnSkip">Skip</button>
+        </div>
+        <div class="main_modal">
+          <button class="main_model--btnClose">&times;</button>
+          <h2>Challange Instructions</h2>
+          <p class="instruction">🧩 Five magical color orbs 🔴🔵🟢🟡🟣</p>
+          <p class="instruction">
+            🧩 Drag and drop the orbs into below enchanted slots
+          </p>
+          <p class="instruction">
+            🧩 Put correct✅ colors in the correct✅ order will only break the
+            curse! 🔓✨
+          </p>
+          <p class="instruction">🧩 Break color code with in 05 attempts</p>
+          <p class="emphasize">
+            ☠️ ☠️ ☠️ Choose wisely... your fate depends on it!
+          </p>
+        </div>
+      </main>
+    </section>
+  </body>
+</html>
