@@ -10,6 +10,7 @@ $(() => {
   const btnReset = $('.display_left--btnReset');
 
   let secretPattern = [];
+  let attemptCount = 0;
   let selectedColorBall = null;
   let originalPlaceOfBall = null;
   const colorCode = [];
@@ -48,8 +49,70 @@ $(() => {
   const changeGameInstrction = (text) => {
     $('.main_intro--instruction').text(text);
   };
+  const showMessage = (message) => {
+    $('.display_middle--notification').fadeIn(800);
+    $('.notification--message').text(message);
+    $('.colors_to_select').css('opacity', '0.1');
+    $('.place_to_put').css('opacity', '0.1');
+    btnCheck.hide();
+  };
 
-  changeGameIntroText(0);
+  const hideMessage = () => {
+    $('.display_middle--notification').fadeOut(800);
+    $('.colors_to_select').css('opacity', '1');
+    $('.place_to_put').css('opacity', '1');
+    btnCheck.show();
+  };
+
+  const generateSecretColorCode = () => {
+    secretPattern = [];
+    const tempColorToChoose = [0, 1, 2, 3, 4];
+    for (let i = 0; i < 3; i++) {
+      let randomColorIndex = Math.floor(
+        Math.random() * tempColorToChoose.length
+      );
+      secretPattern.push(tempColorToChoose[randomColorIndex]);
+      tempColorToChoose.splice(randomColorIndex, 1);
+    }
+    console.log('screcet pattern', secretPattern);
+  };
+
+  const resetGame = () => {
+    allPlaceToPutIn.empty();
+    $('.colors_to_select').empty();
+    allColorsToSelect.appendTo('.colors_to_select');
+    attemptCount = 0;
+    selectedColorBall = null;
+    originalPlaceOfBall = null;
+    dragHandler();
+    generateSecretColorCode();
+    hideMessage();
+    setAttemptCount(0);
+  };
+
+  const dragHandler = () => {
+    allColorsToSelect.each((index, element) => {
+      $(element).attr('draggable', true);
+      $(element).on({
+        dragstart: (e) => {
+          selectedColorBall = $(e.target);
+          originalPlaceOfBall = selectedColorBall.parent();
+          $(e.target).css('opacity', '0.3');
+        },
+        dragend: (e) => {
+          $(e.target).css('opacity', '1');
+        },
+      });
+    });
+  };
+
+  const setAttemptCount = (num) => {
+    $('.display_left--attempts').text(`${num}/5`);
+  };
+
+  const setMessageHeader = (text) => {
+    $('.notification--header').text(`${text}`);
+  };
 
   btnNext.on({
     click: (e) => {
@@ -94,27 +157,27 @@ $(() => {
       colorCode.push(parseInt($(element).text()));
     });
     if (colorCode.length !== 3) {
-      showMessage('Pattern is not succeses..!');
+      showMessage(
+        'Pattern is not succeses..!, fill all the slots with magic orbs'
+      );
     } else if (colorCode.length === 3) {
+      attemptCount += 1;
+      setAttemptCount(attemptCount);
       if (JSON.stringify(colorCode) === JSON.stringify(secretPattern)) {
-        $('.notification--header').text('You have unlocked the chest..');
+        setMessageHeader('You have unlocked the chest..');
         showMessage('Pattern is corrected');
-        resetGame();
+        setTimeout(resetGame, 5000);
+      } else if (attemptCount === 4) {
+        setMessageHeader('Wrong color pattern');
+        showMessage(
+          'Color pattern is incorrect, you have one more chance to check ..!'
+        );
       } else {
-        showMessage('Pattern not correct');
+        setMessageHeader('Wrong color pattern');
+        showMessage('Pattern is not correct, try again');
       }
     }
   });
-
-  const resetGame = () => {
-    allPlaceToPutIn.empty();
-    $('.colors_to_select').empty();
-    allColorsToSelect.appendTo('.colors_to_select');
-    selectedColorBall = null;
-    originalPlaceOfBall = null;
-    dragHandler();
-    generateSecretColorCode();
-  };
 
   btnReset.on('click', () => {
     resetGame();
@@ -122,29 +185,14 @@ $(() => {
 
   $('.main_model--btnClose').on({
     click: () => {
-      mainModal.fadeOut(300);
-      allColorsToSelect.fadeIn(300);
-      allPlaceToPutIn.fadeIn(300);
+      mainModal.fadeOut(100);
+      allColorsToSelect.fadeIn(500);
+      allPlaceToPutIn.fadeIn(500);
       $('.display').css('padding-top', '50px');
-      $('.display_left, .display_right').show();
-      btnCheck.fadeIn(300);
+      $('.display_left, .display_right').fadeIn(500);
+      btnCheck.fadeIn(500);
     },
   });
-  const dragHandler = () => {
-    allColorsToSelect.each((index, element) => {
-      $(element).attr('draggable', true);
-      $(element).on({
-        dragstart: (e) => {
-          selectedColorBall = $(e.target);
-          originalPlaceOfBall = selectedColorBall.parent();
-          $(e.target).css('opacity', '0.3');
-        },
-        dragend: (e) => {
-          $(e.target).css('opacity', '1');
-        },
-      });
-    });
-  };
 
   allPlaceToPutIn.each((index, element) => {
     $(element).on({
@@ -170,34 +218,11 @@ $(() => {
     });
   });
 
-  const generateSecretColorCode = () => {
-    secretPattern = [];
-    const tempColorToChoose = [0, 1, 2, 3, 4];
-    for (let i = 0; i < 3; i++) {
-      let randomColorIndex = Math.floor(
-        Math.random() * tempColorToChoose.length
-      );
-      secretPattern.push(tempColorToChoose[randomColorIndex]);
-      tempColorToChoose.splice(randomColorIndex, 1);
-    }
-    console.log('screcet pattern', secretPattern);
-  };
-
-  const showMessage = (message) => {
-    $('.display_middle--notification').fadeIn(800);
-    $('.notification--message').text(message);
-    $('.colors_to_select').css('opacity', '0.1');
-    $('.place_to_put').css('opacity', '0.1');
-    btnCheck.hide();
-  };
-
   $('.notification--btnClose').on('click', () => {
-    $('.display_middle--notification').fadeOut(800);
-    $('.colors_to_select').css('opacity', '1');
-    $('.place_to_put').css('opacity', '1');
-    btnCheck.show();
+    hideMessage();
   });
 
+  changeGameIntroText(0);
   generateSecretColorCode();
   dragHandler();
 });

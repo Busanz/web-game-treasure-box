@@ -11,6 +11,7 @@
 body {
   border: 0;
   background-color: black;
+  font-family: 'Quicksand', sans-serif;
   justify-items: center;
   background-image: url(../images/bg_image.jpg);
   background-repeat: no-repeat;
@@ -33,6 +34,10 @@ h1 {
   font-size: 3.5rem;
   letter-spacing: 2px;
   font-family: 'Nosifer', sans-serif;
+}
+h3 {
+  font-size: 1.3rem;
+  margin: 0;
 }
 
 button {
@@ -68,8 +73,20 @@ span {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 0 20px var(--border-color), inset 0 0 4px var(--border-color);
-  text-align: start;
+  text-align: center;
   gap: 15px;
+}
+.display_left--attempts {
+  font-size: 1.4rem;
+  color: white;
+  font-weight: bold;
+  margin: 0;
+  padding-bottom: 15px;
+}
+.display_left--btnReset,
+.display_left--btnInstruction {
+  font-family: 'Quicksand', sans-serif;
+  padding: 11px 48px;
 }
 .display_midddle {
   position: relative;
