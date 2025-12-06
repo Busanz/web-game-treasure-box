@@ -81,7 +81,6 @@ $(() => {
       secretPattern.push(tempColorToChoose[randomColorIndex]);
       tempColorToChoose.splice(randomColorIndex, 1);
     }
-    console.log('screcet pattern', secretPattern);
   };
 
   const resetGame = () => {
