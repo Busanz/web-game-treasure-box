@@ -89,7 +89,7 @@ $(() => {
     $('.colors_to_select').empty();
     $('.previous_guesses').empty();
     $('.display_middle--notification')
-      .removeClass('bg_animation')
+      .removeClass('bg_win_loss')
       .css('background-image', `url("")`);
     allColorsToSelect.appendTo('.colors_to_select');
     attemptCount = 0;
@@ -128,11 +128,16 @@ $(() => {
     $('.notification--header').text(`${text}`);
   };
 
-  const chnageBackground = (element = 'body', imageURL, duration = 1000) => {
+  const chnageBackground = (
+    animateClass,
+    element = 'body',
+    imageURL,
+    duration = 1000
+  ) => {
     $(element)
       .css({ opacity: '0.1', 'background-image': `url("${imageURL}")` })
       .animate({ opacity: 1 }, duration, () => {
-        $(element).addClass('bg_animation');
+        $(element).addClass(`${animateClass}`);
       });
   };
 
@@ -167,7 +172,7 @@ $(() => {
   btnNext.on({
     click: (e) => {
       if (btnNext.text().toLowerCase() === 'open the chest') {
-        chnageBackground('body', 'images/bg_ghost.jpg');
+        chnageBackground('bg_animation', 'body', 'images/bg_ghost.jpg');
         changeGameIntroText(2);
         btnNext.fadeOut(100);
         changeGameInstrction('Do you dare to accept the challenge...?');
@@ -182,7 +187,7 @@ $(() => {
   btnSkip.on({
     click: (e) => {
       if (btnSkip.text().toLowerCase() === 'skip') {
-        chnageBackground('body', 'images/bg_ghost.jpg');
+        chnageBackground('bg_animation', 'body', 'images/bg_ghost.jpg');
         btnNext.hide();
         changeGameIntroText(2);
         changeGameInstrction('Do you dare to accept the challenge...?');
@@ -214,8 +219,8 @@ $(() => {
       attemptCount += 1;
       setAttemptCount(attemptCount);
       if (JSON.stringify(colorCode) === JSON.stringify(secretPattern)) {
-        // change background image with treasure box
         chnageBackground(
+          'bg_win_loss',
           '.display_middle--notification',
           'images/bg_won.png',
           500
@@ -232,6 +237,7 @@ $(() => {
         );
       } else if (attemptCount === MAX_ATTEMTS) {
         chnageBackground(
+          'bg_win_loss',
           '.display_middle--notification',
           'images/bg_lost.png',
           500
