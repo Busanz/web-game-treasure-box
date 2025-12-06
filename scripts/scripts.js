@@ -14,6 +14,10 @@ $(() => {
   let selectedColorBall = null;
   let originalPlaceOfBall = null;
   const colorCode = [];
+  let isMessageOpen = false;
+  let isGameWon = false;
+  let isGameLost = false;
+  const MAX_ATTEMTS = 5;
 
   mainModal.hide();
   allColorsToSelect.hide();
@@ -50,18 +54,21 @@ $(() => {
     $('.main_intro--instruction').text(text);
   };
   const showMessage = (message) => {
-    $('.display_middle--notification').fadeIn(800);
+    $('.display_middle--notification').fadeIn(100);
     $('.notification--message').text(message);
-    $('.colors_to_select').css('opacity', '0.1');
-    $('.place_to_put').css('opacity', '0.1');
+    $('.colors_to_select').css('opacity', 0);
+    $('.place_to_put').css('opacity', 0);
     btnCheck.hide();
+    isMessageOpen = !isMessageOpen;
   };
 
   const hideMessage = () => {
-    $('.display_middle--notification').fadeOut(800);
+    $('.display_middle--notification').fadeOut(100);
     $('.colors_to_select').css('opacity', '1');
     $('.place_to_put').css('opacity', '1');
     btnCheck.show();
+
+    isMessageOpen = !isMessageOpen;
   };
 
   const generateSecretColorCode = () => {
@@ -78,8 +85,12 @@ $(() => {
   };
 
   const resetGame = () => {
-    allPlaceToPutIn.empty();
+    allPlaceToPutIn.empty().css({ 'border-color': '#fff', height: '40px' });
     $('.colors_to_select').empty();
+    $('.previous_guesses').empty();
+    $('.display_middle--notification')
+      .removeClass('bg_animation')
+      .css('background-image', `url("")`);
     allColorsToSelect.appendTo('.colors_to_select');
     attemptCount = 0;
     selectedColorBall = null;
@@ -88,6 +99,9 @@ $(() => {
     generateSecretColorCode();
     hideMessage();
     setAttemptCount(0);
+    btnCheck.prop('disabled', false);
+
+    isGameWon = false;
   };
 
   const dragHandler = () => {
@@ -114,13 +128,48 @@ $(() => {
     $('.notification--header').text(`${text}`);
   };
 
+  const chnageBackground = (element = 'body', imageURL, duration = 1000) => {
+    $(element)
+      .css({ opacity: '0.1', 'background-image': `url("${imageURL}")` })
+      .animate({ opacity: 1 }, duration, () => {
+        $(element).addClass('bg_animation');
+      });
+  };
+
+  const showPreviousGuesses = (num, arr) => {
+    const correctColorAndPosition = [];
+    let correctColorAndPositionEmojie = [];
+    const colorToChooseInEmojie = ['🔴', '🟣', '🟢', '🟡', '🔵'];
+    const displayRight = $('.display_right');
+
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === secretPattern[i]) {
+        correctColorAndPosition.push(arr[i]);
+      }
+    }
+
+    if (attemptCount !== MAX_ATTEMTS) {
+      const lastGuess = arr.map((el) => colorToChooseInEmojie[el]).join(' ');
+
+      if (correctColorAndPosition.length > 0) {
+        correctColorAndPositionEmojie = correctColorAndPosition
+          .map((el) => colorToChooseInEmojie[el])
+          .join(' ');
+      } else {
+        correctColorAndPositionEmojie.push('🚫🤞');
+      }
+      $(
+        `<p class="previous_guesses">Attepmt-0${num}<br>${lastGuess} <span class="correct_color_position">Your previous guess </span><br>${correctColorAndPositionEmojie} <span class="correct_color_position">Correct color(s) in right position </span></p>`
+      ).appendTo(displayRight);
+    }
+  };
+
   btnNext.on({
     click: (e) => {
       if (btnNext.text().toLowerCase() === 'open the chest') {
-        $('body').css('background-image', 'url("images/bg_ghost.jpg")');
+        chnageBackground('body', 'images/bg_ghost.jpg');
         changeGameIntroText(2);
-        btnNext.hide();
-
+        btnNext.fadeOut(100);
         changeGameInstrction('Do you dare to accept the challenge...?');
         $('.main_intro--btnSkip').text('Start game');
       } else {
@@ -133,7 +182,7 @@ $(() => {
   btnSkip.on({
     click: (e) => {
       if (btnSkip.text().toLowerCase() === 'skip') {
-        $('body').css('background-image', 'url("images/bg_ghost.jpg")');
+        chnageBackground('body', 'images/bg_ghost.jpg');
         btnNext.hide();
         changeGameIntroText(2);
         changeGameInstrction('Do you dare to accept the challenge...?');
@@ -157,24 +206,46 @@ $(() => {
       colorCode.push(parseInt($(element).text()));
     });
     if (colorCode.length !== 3) {
+      setMessageHeader('One or more slots are empty');
       showMessage(
-        'Pattern is not succeses..!, fill all the slots with magic orbs'
+        'Pattern is not succeses. Fill all the slots with magic orbs'
       );
     } else if (colorCode.length === 3) {
       attemptCount += 1;
       setAttemptCount(attemptCount);
       if (JSON.stringify(colorCode) === JSON.stringify(secretPattern)) {
+        // change background image with treasure box
+        chnageBackground(
+          '.display_middle--notification',
+          'images/bg_won.png',
+          500
+        );
+
         setMessageHeader('You have unlocked the chest..');
         showMessage('Pattern is corrected');
-        setTimeout(resetGame, 5000);
+        btnCheck.prop('disabled', true);
+        isGameWon = true;
       } else if (attemptCount === 4) {
         setMessageHeader('Wrong color pattern');
         showMessage(
           'Color pattern is incorrect, you have one more chance to check ..!'
         );
+      } else if (attemptCount === MAX_ATTEMTS) {
+        chnageBackground(
+          '.display_middle--notification',
+          'images/bg_lost.png',
+          500
+        );
+        setMessageHeader('Wrong color pattern. Game over !');
+        showMessage('Number of attems is over.');
+        btnCheck.prop('disabled', true);
+        isGameLost = true;
       } else {
         setMessageHeader('Wrong color pattern');
         showMessage('Pattern is not correct, try again');
+      }
+      if (!isGameWon) {
+        showPreviousGuesses(attemptCount, colorCode);
       }
     }
   });
@@ -186,11 +257,13 @@ $(() => {
   $('.main_model--btnClose').on({
     click: () => {
       mainModal.fadeOut(100);
-      allColorsToSelect.fadeIn(500);
-      allPlaceToPutIn.fadeIn(500);
-      $('.display').css('padding-top', '50px');
-      $('.display_left, .display_right').fadeIn(500);
-      btnCheck.fadeIn(500);
+      if (!isMessageOpen) {
+        allColorsToSelect.fadeIn(500);
+        allPlaceToPutIn.fadeIn(500);
+        $('.display').css('padding-top', '50px');
+        $('.display_left, .display_right').fadeIn(500);
+        btnCheck.fadeIn(500);
+      }
     },
   });
 
@@ -198,10 +271,10 @@ $(() => {
     $(element).on({
       dragover: (e) => {
         e.preventDefault();
-        $(e.currentTarget).css('height', '70px');
+        $(e.currentTarget).css({ 'border-color': '#00fe40', height: '50px' });
       },
       dragleave: (e) => {
-        $(e.currentTarget).css('height', '40px');
+        $(e.currentTarget).css({ 'border-color': '#fff', height: '40px' });
       },
       drop: (e) => {
         e.preventDefault();
@@ -220,6 +293,14 @@ $(() => {
 
   $('.notification--btnClose').on('click', () => {
     hideMessage();
+    if (isGameWon) {
+      setTimeout(resetGame, 800);
+      isGameWon = !isGameWon;
+    }
+    if (isGameLost) {
+      setTimeout(resetGame, 800);
+      isGameLost = !isGameLost;
+    }
   });
 
   changeGameIntroText(0);
