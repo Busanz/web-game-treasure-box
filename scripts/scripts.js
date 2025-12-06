@@ -8,6 +8,7 @@ $(() => {
   const btnInstruction = $('.display_left--btnInstruction');
   const btnCheck = $('.display_midddle--btnCheck');
   const btnReset = $('.display_left--btnReset');
+  const winAndLoss = $('.display_left--winlose');
 
   let secretPattern = [];
   let attemptCount = 0;
@@ -18,6 +19,8 @@ $(() => {
   let isGameWon = false;
   let isGameLost = false;
   const MAX_ATTEMTS = 5;
+  let wins = 0;
+  let losses = 0;
 
   mainModal.hide();
   allColorsToSelect.hide();
@@ -301,11 +304,14 @@ $(() => {
     if (isGameWon) {
       setTimeout(resetGame, 800);
       isGameWon = !isGameWon;
+      wins += 1;
     }
     if (isGameLost) {
       setTimeout(resetGame, 800);
       isGameLost = !isGameLost;
+      losses += 1;
     }
+    winAndLoss.text(`${wins}/${losses}`);
   });
 
   changeGameIntroText(0);
