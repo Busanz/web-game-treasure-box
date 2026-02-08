@@ -79,7 +79,7 @@ $(() => {
     const tempColorToChoose = [0, 1, 2, 3, 4];
     for (let i = 0; i < 3; i++) {
       let randomColorIndex = Math.floor(
-        Math.random() * tempColorToChoose.length
+        Math.random() * tempColorToChoose.length,
       );
       secretPattern.push(tempColorToChoose[randomColorIndex]);
       tempColorToChoose.splice(randomColorIndex, 1);
@@ -97,7 +97,7 @@ $(() => {
     attemptCount = 0;
     selectedColorBall = null;
     originalPlaceOfBall = null;
-    dragHandler();
+    pointerHandler();
     generateSecretColorCode();
     hideMessage();
     setAttemptCount(0);
@@ -106,19 +106,87 @@ $(() => {
     isGameWon = false;
   };
 
-  const dragHandler = () => {
-    allColorsToSelect.each((index, element) => {
-      $(element).attr('draggable', true);
-      $(element).on({
-        dragstart: (e) => {
-          selectedColorBall = $(e.target);
-          originalPlaceOfBall = selectedColorBall.parent();
-          $(e.target).css('opacity', '0.3');
-        },
-        dragend: (e) => {
-          $(e.target).css('opacity', '1');
-        },
+  const pointerHandler = () => {
+    let draggedBall = null;
+    let originalParent = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    $('.color_ball').on('pointerdown', (e) => {
+      draggedBall = $(e.target).closest('.color_ball');
+      if (!draggedBall.length) return;
+      originalParent = draggedBall.parent();
+
+      const rectDraggedBall = draggedBall[0].getBoundingClientRect();
+      offsetX = e.clientX - rectDraggedBall.left;
+      offsetY = e.clientY - rectDraggedBall.top;
+
+      draggedBall.addClass('dragging').css({
+        position: 'fixed',
+        left: rectDraggedBall.left,
+        top: rectDraggedBall.top,
+        width: rectDraggedBall.width,
+        height: rectDraggedBall.height,
       });
+    });
+
+    $(document).on('pointermove', (e) => {
+      if (!draggedBall) return;
+
+      draggedBall.css({
+        left: e.clientX - offsetX,
+        top: e.clientY - offsetY,
+      });
+    });
+
+    $(document).on('pointerup pointercancel', () => {
+      if (!draggedBall) return;
+
+      let dropped = false;
+
+      $('.put_in').each((index, element) => {
+        const putInZone = element.getBoundingClientRect();
+        const movingBall = draggedBall[0].getBoundingClientRect();
+
+        const isInside =
+          movingBall.left < putInZone.right &&
+          movingBall.right > putInZone.left &&
+          movingBall.top < putInZone.bottom &&
+          movingBall.bottom > putInZone.top;
+
+        if (isInside) {
+          const existingBall = $(element).find('.color_ball');
+
+          if (existingBall.length) {
+            originalParent.append(existingBall);
+          }
+
+          draggedBall.removeClass('dragging').css({
+            position: '',
+            left: '',
+            top: '',
+            width: '',
+            height: '',
+          });
+
+          $(element).append(draggedBall);
+          dropped = true;
+        }
+      });
+
+      if (!dropped) {
+        draggedBall.removeClass('dragging').css({
+          position: '',
+          left: '',
+          top: '',
+          width: '',
+          height: '',
+        });
+
+        originalParent.append(draggedBall);
+      }
+
+      draggedBall = null;
     });
   };
 
@@ -134,7 +202,7 @@ $(() => {
     animateClass,
     element = 'body',
     imageURL,
-    duration = 1000
+    duration = 1000,
   ) => {
     $(element)
       .css({ opacity: '0.1', 'background-image': `url("${imageURL}")` })
@@ -166,7 +234,7 @@ $(() => {
         correctColorAndPositionEmojie.push('🚫🤞');
       }
       $(
-        `<p class="previous_guesses">Attepmt-0${num}<br>${lastGuess} <span class="correct_color_position">Your previous guess </span><br>${correctColorAndPositionEmojie} <span class="correct_color_position">Correct color(s) in right position </span></p>`
+        `<p class="previous_guesses">Attepmt-0${num}<br>${lastGuess} <span class="correct_color_position">Your previous guess </span><br>${correctColorAndPositionEmojie} <span class="correct_color_position">Correct color(s) in right position </span></p>`,
       ).appendTo(displayRight);
     }
   };
@@ -215,7 +283,7 @@ $(() => {
     if (colorCode.length !== 3) {
       setMessageHeader('One or more slots are empty');
       showMessage(
-        'Pattern is not succeses. Fill all the slots with magic orbs'
+        'Pattern is not succeses. Fill all the slots with magic orbs',
       );
     } else if (colorCode.length === 3) {
       attemptCount += 1;
@@ -225,7 +293,7 @@ $(() => {
           'bg_win_loss',
           '.display_middle--notification',
           'images/bg_won.png',
-          500
+          500,
         );
 
         setMessageHeader('You have unlocked the chest..');
@@ -235,14 +303,14 @@ $(() => {
       } else if (attemptCount === 4) {
         setMessageHeader('Wrong color pattern');
         showMessage(
-          'Color pattern is incorrect, you have one more chance to check ..!'
+          'Color pattern is incorrect, you have one more chance to check ..!',
         );
       } else if (attemptCount === MAX_ATTEMTS) {
         chnageBackground(
           'bg_win_loss',
           '.display_middle--notification',
           'images/bg_lost.png',
-          500
+          500,
         );
         setMessageHeader('Wrong color pattern. Game over !');
         showMessage('Number of attems is over.');
@@ -275,30 +343,6 @@ $(() => {
     },
   });
 
-  allPlaceToPutIn.each((index, element) => {
-    $(element).on({
-      dragover: (e) => {
-        e.preventDefault();
-        $(e.currentTarget).css({ 'border-color': '#00fe40', height: '50px' });
-      },
-      dragleave: (e) => {
-        $(e.currentTarget).css({ 'border-color': '#fff', height: '40px' });
-      },
-      drop: (e) => {
-        e.preventDefault();
-        const dropPutInTarget = $(e.currentTarget);
-        dropPutInTarget.css('height', '40px');
-
-        const existingBall = dropPutInTarget.find('.color_ball');
-
-        if (existingBall.length > 0) {
-          originalPlaceOfBall.append(existingBall);
-        }
-        dropPutInTarget.append(selectedColorBall);
-      },
-    });
-  });
-
   $('.notification--btnClose').on('click', () => {
     hideMessage();
     if (isGameWon) {
@@ -316,5 +360,5 @@ $(() => {
 
   changeGameIntroText(0);
   generateSecretColorCode();
-  dragHandler();
+  pointerHandler();
 });
