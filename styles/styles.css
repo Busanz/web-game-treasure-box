@@ -197,6 +197,7 @@ button:hover {
   user-select: none;
 }
 .color_ball.dragging {
+  pointer-events: none;
   opacity: 0.85;
   z-index: 9999;
 }
